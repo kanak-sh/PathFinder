@@ -8,6 +8,8 @@ const sizeValueLabel = document.getElementById("size-value");
 const speedSlider = document.getElementById("speed-slider");
 const speedValueLabel = document.getElementById("speed-value");
 const generateBtn = document.getElementById("generate-btn");
+const resetBtn = document.getElementById("reset-btn");
+const skipEndBtn = document.getElementById("skip-end-btn");
 const runBtn = document.getElementById("run-btn");
 const runBtnIcon = document.getElementById("run-btn-icon");
 const runBtnLabel = document.getElementById("run-btn-label");
@@ -31,7 +33,6 @@ const PLAY_ICON = '<polygon points="6 4 20 12 6 20"/>';
 const PAUSE_ICON = '<rect x="5" y="4" width="5" height="16"/><rect x="14" y="4" width="5" height="16"/>';
 const SPEED_INTERVALS = { 1: 650, 2: 400, 3: 220, 4: 110, 5: 40 };
 
-// Disabled nav items: show a gentle alert instead of doing nothing silently.
 document.querySelectorAll(".nav-item.disabled").forEach((el) => {
   el.addEventListener("click", (e) => {
     e.preventDefault();
@@ -78,7 +79,6 @@ let currentSteps = [];
 let currentStepIndex = -1;
 let playTimer = null;
 
-// --- Backend connectivity check ---
 pingBackend()
   .then((data) => {
     statusEl.textContent = `Connected: ${data.message}`;
@@ -90,7 +90,6 @@ pingBackend()
     console.error(err);
   });
 
-// --- Array generation ---
 function generateRandomArray(size) {
   const arr = [];
   for (let i = 0; i < size; i++) {
@@ -99,8 +98,6 @@ function generateRandomArray(size) {
   return arr;
 }
 
-// --- Determine each bar's visual class for a given step ---
-// Priority: sorted (lowest) < pivot/mid < comparing/active (highest, transient)
 function computeBarClasses(step, arrayLength) {
   const classes = new Array(arrayLength).fill("");
 
@@ -126,7 +123,6 @@ function computeBarClasses(step, arrayLength) {
   return classes;
 }
 
-// --- Rendering ---
 function renderArray(array, classesArray = []) {
   arrayContainer.innerHTML = "";
   const max = Math.max(...array, 1);
@@ -136,7 +132,7 @@ function renderArray(array, classesArray = []) {
     bar.className = "bar" + (classesArray[index] ? ` ${classesArray[index]}` : "");
     bar.style.height = `${(value / max) * 100}%`;
 
-    bar.addEventListener("mouseenter", (e) => {
+    bar.addEventListener("mouseenter", () => {
       barTooltip.textContent = value;
       barTooltip.style.display = "block";
     });
@@ -176,9 +172,14 @@ function describeStep(step) {
 }
 
 function renderStep(index) {
-  if (currentSteps.length === 0) {
-    stepCountEl.textContent = "Step 0 / 0";
-    stepDescEl.textContent = "Generate an array and hit Go to begin.";
+  if (index === -1 || currentSteps.length === 0) {
+    currentStepIndex = -1;
+    stepCountEl.textContent = currentSteps.length === 0
+      ? "Step 0 / 0"
+      : `Step 0 / ${currentSteps.length}`;
+    stepDescEl.textContent = currentSteps.length === 0
+      ? "Generate an array and hit Go to begin."
+      : "Back at the original array. Hit Go to play, or Next to step through.";
     renderArray(currentArray);
     updateNavButtons();
     return;
@@ -201,7 +202,6 @@ function updateNavButtons() {
   nextStepBtn.disabled = currentSteps.length === 0 || currentStepIndex >= currentSteps.length - 1;
 }
 
-// --- About card ---
 function updateAboutCard(algorithm) {
   const info = ALGO_INFO[algorithm];
   aboutName.textContent = info.name;
@@ -214,7 +214,6 @@ function updateAboutCard(algorithm) {
   aboutInplace.className = info.inPlace ? "ok-text" : "warn-text";
 }
 
-// --- Keep pills + quick-algo buttons + about card all in sync ---
 function selectAlgorithm(algorithm) {
   if (isPlaying()) stopPlaying();
 
@@ -248,7 +247,6 @@ quickAlgoGrid.addEventListener("click", (e) => {
   selectAlgorithm(btn.dataset.algorithm);
 });
 
-// --- Sliders ---
 sizeSlider.addEventListener("input", () => {
   sizeValueLabel.textContent = sizeSlider.value;
 });
@@ -257,7 +255,6 @@ speedSlider.addEventListener("input", () => {
   speedValueLabel.textContent = `${speedSlider.value}x`;
 });
 
-// --- Generate / Shuffle ---
 generateBtn.addEventListener("click", () => {
   if (isPlaying()) stopPlaying();
   currentArray = generateRandomArray(parseInt(sizeSlider.value, 10));
@@ -270,7 +267,20 @@ generateBtn.addEventListener("click", () => {
   statSize.textContent = currentArray.length;
 });
 
-// --- Auto-play ---
+resetBtn.addEventListener("click", () => {
+  if (isPlaying()) stopPlaying();
+  renderStep(-1);
+});
+
+skipEndBtn.addEventListener("click", () => {
+  if (isPlaying()) stopPlaying();
+  if (currentSteps.length === 0) {
+    alert("Hit Go first to generate the steps.");
+    return;
+  }
+  renderStep(currentSteps.length - 1);
+});
+
 function isPlaying() {
   return playTimer !== null;
 }
@@ -304,14 +314,12 @@ function stopPlaying() {
   pillsContainer.querySelectorAll(".pill").forEach((p) => p.disabled = false);
 }
 
-// --- Run / Play / Pause ---
 runBtn.addEventListener("click", async () => {
   if (isPlaying()) {
     stopPlaying();
     return;
   }
 
-  // Already have steps loaded (paused mid-way, or finished) -> just resume/replay.
   if (currentSteps.length > 0) {
     if (currentStepIndex >= currentSteps.length - 1) {
       renderStep(0);
@@ -343,7 +351,6 @@ runBtn.addEventListener("click", async () => {
   }
 });
 
-// --- Manual step navigation (also pauses auto-play) ---
 prevStepBtn.addEventListener("click", () => {
   if (isPlaying()) stopPlaying();
   renderStep(currentStepIndex - 1);
@@ -353,7 +360,6 @@ nextStepBtn.addEventListener("click", () => {
   renderStep(currentStepIndex + 1);
 });
 
-// --- Initial state on page load ---
 currentArray = generateRandomArray(parseInt(sizeSlider.value, 10));
 renderStep(-1);
 statSize.textContent = currentArray.length;

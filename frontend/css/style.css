@@ -325,6 +325,10 @@ input[type="range"]:disabled {
 .btn-solid { background: #534AB7; color: #EEEDFE; }
 .btn-solid:hover { background: #453da0; }
 
+#reset-btn, #skip-end-btn {
+  padding: 10px 12px;
+}
+
 .array-container {
   display: flex;
   align-items: flex-end;
