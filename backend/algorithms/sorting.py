@@ -1,13 +1,19 @@
 """
 Sorting algorithms that return a step-by-step history instead of just
-a sorted array. Each step is a dict the frontend can use to animate
-the algorithm's progress.
+a sorted array. Each step is a dict the frontend uses to animate and
+explain the algorithm's progress.
 
-Step format:
+Common step fields:
 {
     "type": "compare" | "swap" | "overwrite" | "done",
-    "indices": [i, j],       # array indices involved in this step
-    "array": [...],          # full array state AFTER this step
+    "indices": [i, j],          # array indices involved in this step
+    "array": [...],             # full array state AFTER this step
+
+    # Optional, algorithm-specific extras:
+    "sorted_from": int,         # indices >= this are guaranteed sorted (bubble, heap)
+    "sorted_upto": int,         # indices < this are guaranteed sorted (selection, insertion)
+    "pivot": int,                # current pivot index (quick sort)
+    "mid": int                   # current midpoint being merged around (merge sort)
 }
 """
 
@@ -15,17 +21,7 @@ import time
 
 
 def bubble_sort(arr):
-    """
-    Classic bubble sort with step tracking.
-
-    Returns:
-        {
-            "steps": [...],
-            "comparisons": int,
-            "swaps": int,
-            "execution_time_ms": float
-        }
-    """
+    """Bubble sort. Sorted region grows from the end (trailing suffix)."""
     array = arr.copy()
     steps = []
     comparisons = 0
@@ -35,12 +31,14 @@ def bubble_sort(arr):
 
     n = len(array)
     for i in range(n):
+        sorted_from = n - i
         for j in range(0, n - i - 1):
             comparisons += 1
             steps.append({
                 "type": "compare",
                 "indices": [j, j + 1],
-                "array": array.copy()
+                "array": array.copy(),
+                "sorted_from": sorted_from
             })
 
             if array[j] > array[j + 1]:
@@ -49,15 +47,11 @@ def bubble_sort(arr):
                 steps.append({
                     "type": "swap",
                     "indices": [j, j + 1],
-                    "array": array.copy()
+                    "array": array.copy(),
+                    "sorted_from": sorted_from
                 })
 
-    steps.append({
-        "type": "done",
-        "indices": [],
-        "array": array.copy()
-    })
-
+    steps.append({"type": "done", "indices": [], "array": array.copy()})
     end_time = time.perf_counter()
 
     return {
@@ -69,7 +63,7 @@ def bubble_sort(arr):
 
 
 def selection_sort(arr):
-    """Selection sort with step tracking."""
+    """Selection sort. Sorted region grows from the front (leading prefix)."""
     array = arr.copy()
     steps = []
     comparisons = 0
@@ -85,7 +79,8 @@ def selection_sort(arr):
             steps.append({
                 "type": "compare",
                 "indices": [min_idx, j],
-                "array": array.copy()
+                "array": array.copy(),
+                "sorted_upto": i
             })
             if array[j] < array[min_idx]:
                 min_idx = j
@@ -96,7 +91,8 @@ def selection_sort(arr):
             steps.append({
                 "type": "swap",
                 "indices": [i, min_idx],
-                "array": array.copy()
+                "array": array.copy(),
+                "sorted_upto": i + 1
             })
 
     steps.append({"type": "done", "indices": [], "array": array.copy()})
@@ -111,7 +107,7 @@ def selection_sort(arr):
 
 
 def insertion_sort(arr):
-    """Insertion sort with step tracking."""
+    """Insertion sort. Sorted region grows from the front (leading prefix)."""
     array = arr.copy()
     steps = []
     comparisons = 0
@@ -128,7 +124,8 @@ def insertion_sort(arr):
             steps.append({
                 "type": "compare",
                 "indices": [j, j + 1],
-                "array": array.copy()
+                "array": array.copy(),
+                "sorted_upto": i
             })
             if array[j] > key:
                 array[j + 1] = array[j]
@@ -136,7 +133,8 @@ def insertion_sort(arr):
                 steps.append({
                     "type": "overwrite",
                     "indices": [j + 1],
-                    "array": array.copy()
+                    "array": array.copy(),
+                    "sorted_upto": i
                 })
                 j -= 1
             else:
@@ -145,7 +143,8 @@ def insertion_sort(arr):
         steps.append({
             "type": "overwrite",
             "indices": [j + 1],
-            "array": array.copy()
+            "array": array.copy(),
+            "sorted_upto": i + 1
         })
 
     steps.append({"type": "done", "indices": [], "array": array.copy()})
@@ -160,7 +159,9 @@ def insertion_sort(arr):
 
 
 def merge_sort(arr):
-    """Merge sort with step tracking (recursive core with an iterative-style wrapper)."""
+    """Merge sort. Each step tags the current midpoint so the frontend
+    can highlight it, since merge sort's 'sorted region' isn't a simple
+    prefix/suffix like bubble/selection/insertion."""
     array = arr.copy()
     steps = []
     counters = {"comparisons": 0, "swaps": 0}
@@ -178,7 +179,8 @@ def merge_sort(arr):
             steps.append({
                 "type": "compare",
                 "indices": [lo + i, mid + 1 + j],
-                "array": array.copy()
+                "array": array.copy(),
+                "mid": mid
             })
             if left[i] <= right[j]:
                 array[k] = left[i]
@@ -190,19 +192,20 @@ def merge_sort(arr):
             steps.append({
                 "type": "overwrite",
                 "indices": [k],
-                "array": array.copy()
+                "array": array.copy(),
+                "mid": mid
             })
             k += 1
 
         while i < len(left):
             array[k] = left[i]
-            steps.append({"type": "overwrite", "indices": [k], "array": array.copy()})
+            steps.append({"type": "overwrite", "indices": [k], "array": array.copy(), "mid": mid})
             i += 1
             k += 1
 
         while j < len(right):
             array[k] = right[j]
-            steps.append({"type": "overwrite", "indices": [k], "array": array.copy()})
+            steps.append({"type": "overwrite", "indices": [k], "array": array.copy(), "mid": mid})
             j += 1
             k += 1
 
@@ -228,7 +231,8 @@ def merge_sort(arr):
 
 
 def quick_sort(arr):
-    """Quick sort (Lomuto partition) with step tracking."""
+    """Quick sort (Lomuto partition). Each step tags the current pivot
+    index so the frontend can highlight it distinctly."""
     array = arr.copy()
     steps = []
     counters = {"comparisons": 0, "swaps": 0}
@@ -243,7 +247,8 @@ def quick_sort(arr):
             steps.append({
                 "type": "compare",
                 "indices": [j, hi],
-                "array": array.copy()
+                "array": array.copy(),
+                "pivot": hi
             })
             if array[j] <= pivot:
                 i += 1
@@ -252,14 +257,16 @@ def quick_sort(arr):
                 steps.append({
                     "type": "swap",
                     "indices": [i, j],
-                    "array": array.copy()
+                    "array": array.copy(),
+                    "pivot": hi
                 })
         array[i + 1], array[hi] = array[hi], array[i + 1]
         counters["swaps"] += 1
         steps.append({
             "type": "swap",
             "indices": [i + 1, hi],
-            "array": array.copy()
+            "array": array.copy(),
+            "pivot": hi
         })
         return i + 1
 
@@ -283,7 +290,8 @@ def quick_sort(arr):
 
 
 def heap_sort(arr):
-    """Heap sort with step tracking."""
+    """Heap sort. Sorted region grows from the end during the extraction
+    phase (once the max-heap has been built)."""
     array = arr.copy()
     steps = []
     comparisons = 0
@@ -292,6 +300,7 @@ def heap_sort(arr):
     start_time = time.perf_counter()
 
     n = len(array)
+    sorted_from = n  # nothing sorted yet during the build phase
 
     def heapify(size, root):
         nonlocal comparisons, swaps
@@ -301,20 +310,20 @@ def heap_sort(arr):
 
         if left < size:
             comparisons += 1
-            steps.append({"type": "compare", "indices": [largest, left], "array": array.copy()})
+            steps.append({"type": "compare", "indices": [largest, left], "array": array.copy(), "sorted_from": sorted_from})
             if array[left] > array[largest]:
                 largest = left
 
         if right < size:
             comparisons += 1
-            steps.append({"type": "compare", "indices": [largest, right], "array": array.copy()})
+            steps.append({"type": "compare", "indices": [largest, right], "array": array.copy(), "sorted_from": sorted_from})
             if array[right] > array[largest]:
                 largest = right
 
         if largest != root:
             array[root], array[largest] = array[largest], array[root]
             swaps += 1
-            steps.append({"type": "swap", "indices": [root, largest], "array": array.copy()})
+            steps.append({"type": "swap", "indices": [root, largest], "array": array.copy(), "sorted_from": sorted_from})
             heapify(size, largest)
 
     for i in range(n // 2 - 1, -1, -1):
@@ -323,7 +332,8 @@ def heap_sort(arr):
     for i in range(n - 1, 0, -1):
         array[0], array[i] = array[i], array[0]
         swaps += 1
-        steps.append({"type": "swap", "indices": [0, i], "array": array.copy()})
+        sorted_from = i
+        steps.append({"type": "swap", "indices": [0, i], "array": array.copy(), "sorted_from": sorted_from})
         heapify(i, 0)
 
     steps.append({"type": "done", "indices": [], "array": array.copy()})

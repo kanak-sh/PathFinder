@@ -4,17 +4,202 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PathFinder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <header>
-    <h1>PathFinder</h1>
-    <p id="status">Checking connection to backend...</p>
-  </header>
+  <div class="app-shell">
 
-  <main>
-    <!-- Sorting/Pathfinding visualizer UI will be built here in later phases -->
-  </main>
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h6a4 4 0 0 1 4 4v2a4 4 0 0 1-4 4H8"/></svg>
+        </span>
+        <div>
+          <h1>PathFinder</h1>
+          <p class="tagline">Visualize. Explore.</p>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <a href="#" class="nav-item disabled" data-tooltip="Coming in a later phase">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home
+        </a>
+        <a href="#" class="nav-item active">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="10"/><line x1="10" y1="20" x2="10" y2="4"/><line x1="16" y1="20" x2="16" y2="14"/></svg>Sorting
+        </a>
+        <a href="#" class="nav-item disabled" data-tooltip="Coming in Phase 5">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/></svg>Pathfinding
+        </a>
+        <a href="#" class="nav-item disabled" data-tooltip="Coming in Phase 7">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="16"/><rect x="14" y="4" width="7" height="16"/></svg>Compare
+        </a>
+        <a href="#" class="nav-item disabled" data-tooltip="Coming in Phase 8">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="14 6 21 6 21 13"/></svg>Benchmarks
+        </a>
+      </nav>
+
+      <div class="sidebar-card">
+        <p class="sidebar-card-title">Sorting is live</p>
+        <p class="sidebar-card-body">Pick an algorithm, shuffle an array, and hit Go.</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="top-bar">
+        <div>
+          <h2>Sorting <span class="accent">Visualizer</span></h2>
+          <p class="subtitle">Watch sorting algorithms arrange data, step by step.</p>
+        </div>
+        <div class="top-bar-right">
+          <p id="status">Checking connection...</p>
+          <div class="profile">
+            <span class="profile-avatar">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+            </span>
+            <span class="profile-name">Guest</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="main-col">
+          <section class="algo-pills" id="algo-pills">
+            <button class="pill pill-bubble active" data-algorithm="bubble">Bubble sort</button>
+            <button class="pill pill-selection" data-algorithm="selection">Selection sort</button>
+            <button class="pill pill-insertion" data-algorithm="insertion">Insertion sort</button>
+            <button class="pill pill-merge" data-algorithm="merge">Merge sort</button>
+            <button class="pill pill-quick" data-algorithm="quick">Quick sort</button>
+            <button class="pill pill-heap" data-algorithm="heap">Heap sort</button>
+          </section>
+
+          <section class="visualizer-panel">
+            <div class="panel-controls">
+              <div class="slider-group">
+                <label>
+                  Array size
+                  <div class="slider-row">
+                    <input type="range" id="size-slider" min="5" max="100" value="30" />
+                    <span id="size-value">30</span>
+                  </div>
+                </label>
+                <label>
+                  Speed
+                  <div class="slider-row">
+                    <input type="range" id="speed-slider" min="1" max="5" value="3" />
+                    <span id="speed-value">3x</span>
+                  </div>
+                </label>
+              </div>
+              <div class="button-row">
+                <button id="generate-btn" class="btn-soft">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="8" cy="8" r="0.8" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="0.8" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="0.8" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="0.8" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg>
+                  Shuffle
+                </button>
+                <button id="run-btn" class="btn-solid">
+                  <svg id="run-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20"/></svg>
+                  <span id="run-btn-label">Go</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="array-container" class="array-container"></div>
+
+            <div class="legend">
+              <span><i class="dot dot-unsorted"></i>Unsorted</span>
+              <span><i class="dot dot-comparing"></i>Comparing</span>
+              <span><i class="dot dot-active"></i>Active</span>
+              <span><i class="dot dot-pivot"></i>Pivot / Mid</span>
+              <span><i class="dot dot-sorted"></i>Sorted</span>
+            </div>
+          </section>
+
+          <section class="step-banner" id="step-banner">
+            <div>
+              <p class="step-count" id="step-count">Step 0 / 0</p>
+              <p class="step-desc" id="step-desc">Generate an array and hit Go to begin.</p>
+            </div>
+            <div class="step-buttons">
+              <button id="prev-step-btn" aria-label="Previous step">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <button id="next-step-btn" aria-label="Next step">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </section>
+
+          <section class="bottom-row">
+            <div class="quick-algo-card">
+              <p class="quick-algo-title">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Quick algorithms
+              </p>
+              <div class="quick-algo-grid">
+                <button class="quick-btn active" data-algorithm="bubble">Bubble Sort</button>
+                <button class="quick-btn" data-algorithm="selection">Selection Sort</button>
+                <button class="quick-btn" data-algorithm="insertion">Insertion Sort</button>
+                <button class="quick-btn" data-algorithm="merge">Merge Sort</button>
+                <button class="quick-btn" data-algorithm="quick">Quick Sort</button>
+                <button class="quick-btn" data-algorithm="heap">Heap Sort</button>
+              </div>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-card stat-purple">
+                <p><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Comparisons</p>
+                <strong id="stat-comparisons">-</strong>
+                <svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,20 15,16 30,17 45,10 60,12 75,4 100,2" fill="none" stroke="#534AB7" stroke-width="2"/></svg>
+              </div>
+              <div class="stat-card stat-pink">
+                <p><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 3 21 7 17 11"/><path d="M21 7H3"/><polyline points="7 21 3 17 7 13"/><path d="M3 17h18"/></svg>Swaps</p>
+                <strong id="stat-swaps">-</strong>
+                <svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,18 15,19 30,12 45,14 60,6 75,9 100,3" fill="none" stroke="#D4537E" stroke-width="2"/></svg>
+              </div>
+              <div class="stat-card stat-teal">
+                <p><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>Time elapsed</p>
+                <strong id="stat-time">-</strong>
+                <svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,20 15,15 30,17 45,9 60,11 75,5 100,7" fill="none" stroke="#1D9E75" stroke-width="2"/></svg>
+              </div>
+              <div class="stat-card stat-coral">
+                <p><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Array size</p>
+                <strong id="stat-size">-</strong>
+                <svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="0,12 15,12 30,12 45,12 60,12 75,12 100,12" fill="none" stroke="#D85A30" stroke-width="2"/></svg>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <aside class="about-card">
+          <p class="about-title">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#EF9F27" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>
+            About <span id="about-name">Bubble Sort</span>
+          </p>
+          <p class="about-desc" id="about-desc">Repeatedly steps through the array, swapping adjacent elements that are out of order, until nothing more needs swapping.</p>
+
+          <div class="about-stat">
+            <span class="about-stat-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>
+            <div><p>Time complexity</p><strong id="about-time">O(n&sup2;)</strong></div>
+          </div>
+          <div class="about-stat">
+            <span class="about-stat-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 3 21 8 12 13 3 8 12 3"/><polyline points="3 13 12 18 21 13"/></svg></span>
+            <div><p>Space complexity</p><strong id="about-space">O(1)</strong></div>
+          </div>
+          <div class="about-stat">
+            <span class="about-stat-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8 12 11 15 16 9"/></svg></span>
+            <div><p>Stable</p><strong id="about-stable" class="ok-text">Yes</strong></div>
+          </div>
+          <div class="about-stat">
+            <span class="about-stat-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg></span>
+            <div><p>In-place</p><strong id="about-inplace" class="ok-text">Yes</strong></div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <div id="bar-tooltip" class="bar-tooltip"></div>
 
   <script src="js/api.js"></script>
   <script src="js/main.js"></script>
