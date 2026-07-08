@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from config import Config
 from routes.sorting import sorting_bp
+from routes.pathfinding import pathfinding_bp
 
 def create_app():
     app = Flask(__name__)
@@ -16,9 +17,10 @@ def create_app():
         return jsonify({"status": "ok", "message": "pong"})
 
     app.register_blueprint(sorting_bp, url_prefix="/api/sorting")
+    app.register_blueprint(pathfinding_bp, url_prefix="/api/pathfinding")
 
-    # Route blueprints for pathfinding, benchmarks, and history will be
-    # registered here in later phases.
+    # Route blueprints for benchmarks and history will be registered
+    # here in later phases.
 
     return app
 

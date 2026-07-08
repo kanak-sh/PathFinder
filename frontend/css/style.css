@@ -586,6 +586,63 @@ input[type="range"]:disabled {
 .ok-text { color: #3B6D11 !important; }
 .warn-text { color: #A32D2D !important; }
 
+/* Pathfinding grid */
+.grid-container {
+  display: grid;
+  gap: 1px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 8px;
+  user-select: none;
+}
+
+.cell {
+  aspect-ratio: 1 / 1;
+  background: #f5f4f9;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.cell.wall {
+  background: #3d3a52;
+}
+
+.cell.frontier {
+  background: #FBE7B8;
+}
+
+.cell.visited {
+  background: #CFC9F5;
+}
+
+.cell.path {
+  background: #5DCAA5;
+}
+
+.cell.start {
+  background: #1D9E75;
+  cursor: grab;
+}
+
+.cell.end {
+  background: #D4537E;
+  cursor: grab;
+}
+
+.grid-hint {
+  font-size: 11px;
+  color: #6f6ab0;
+  margin: 8px 0 0;
+}
+
+.dot-start    { background: #1D9E75; }
+.dot-end      { background: #D4537E; }
+.dot-wall     { background: #3d3a52; }
+.dot-frontier { background: #FBE7B8; }
+.dot-visited  { background: #CFC9F5; }
+.dot-path     { background: #5DCAA5; }
+
 @media (max-width: 640px) {
   .app-shell { flex-direction: column; }
   .sidebar { width: 100%; }
