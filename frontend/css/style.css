@@ -632,6 +632,138 @@ input[type="range"]:disabled {
   flex-shrink: 0;
 }
 
+/* Compare page */
+.algo-select {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  background: #ffffff;
+  color: #26215C;
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 800px) {
+  .compare-grid { grid-template-columns: 1fr; }
+}
+
+.compare-panel {
+  background: #EEEDFE;
+  border-radius: 16px;
+  padding: 1rem;
+}
+
+.compare-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #26215C;
+  margin-bottom: 10px;
+}
+
+.compare-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.compare-a .compare-dot { background: #534AB7; }
+.compare-b .compare-dot { background: #D4537E; }
+
+.compare-status {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6f6ab0;
+  background: #ffffff;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.compare-status.running { color: #8a6a1f; background: #FEF3D6; }
+.compare-status.done { color: #0F6E56; background: #E1F5EE; }
+
+.compare-array {
+  height: 160px;
+  margin-bottom: 10px;
+}
+
+.compare-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.compare-stats div {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 7px 8px;
+}
+
+.compare-stats span {
+  display: block;
+  font-size: 9.5px;
+  color: #888780;
+  margin-bottom: 2px;
+}
+
+.compare-stats strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: #26215C;
+}
+
+.winner-card {
+  background: #FAEEDA;
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+}
+
+.winner-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #412402;
+  margin: 0 0 10px;
+}
+
+.winner-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.winner-item {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.winner-item span {
+  display: block;
+  font-size: 10.5px;
+  color: #8a6a1f;
+  margin-bottom: 4px;
+}
+
+.winner-item strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: #412402;
+}
+
 .ok-text { color: #3B6D11 !important; }
 .warn-text { color: #A32D2D !important; }
 
