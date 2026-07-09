@@ -184,9 +184,16 @@
           </p>
           <p class="about-desc" id="about-desc">Repeatedly steps through the array, swapping adjacent elements that are out of order, until nothing more needs swapping.</p>
 
-          <div class="about-stat">
-            <span class="about-stat-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>
-            <div><p>Time complexity</p><strong id="about-time">O(n&sup2;)</strong></div>
+          <div class="complexity-block">
+            <p class="complexity-label">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+              Time complexity
+            </p>
+            <div class="complexity-grid">
+              <div><span>Best</span><strong id="about-time-best">O(n)</strong></div>
+              <div><span>Average</span><strong id="about-time-avg">O(n&sup2;)</strong></div>
+              <div><span>Worst</span><strong id="about-time-worst">O(n&sup2;)</strong></div>
+            </div>
           </div>
           <div class="about-stat">
             <span class="about-stat-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 3 21 8 12 13 3 8 12 3"/><polyline points="3 13 12 18 21 13"/></svg></span>

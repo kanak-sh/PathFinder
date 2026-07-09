@@ -21,7 +21,11 @@ import time
 
 
 def bubble_sort(arr):
-    """Bubble sort. Sorted region grows from the end (trailing suffix)."""
+    """Bubble sort with early-exit optimization: if a full pass makes no
+    swaps, the array is already sorted and we stop immediately. This is
+    what gives bubble sort its O(n) best case on already-sorted input --
+    without this check every pass would run regardless, making it O(n^2)
+    even in the best case."""
     array = arr.copy()
     steps = []
     comparisons = 0
@@ -32,6 +36,7 @@ def bubble_sort(arr):
     n = len(array)
     for i in range(n):
         sorted_from = n - i
+        swapped_this_pass = False
         for j in range(0, n - i - 1):
             comparisons += 1
             steps.append({
@@ -44,12 +49,16 @@ def bubble_sort(arr):
             if array[j] > array[j + 1]:
                 array[j], array[j + 1] = array[j + 1], array[j]
                 swaps += 1
+                swapped_this_pass = True
                 steps.append({
                     "type": "swap",
                     "indices": [j, j + 1],
                     "array": array.copy(),
                     "sorted_from": sorted_from
                 })
+
+        if not swapped_this_pass:
+            break
 
     steps.append({"type": "done", "indices": [], "array": array.copy()})
     end_time = time.perf_counter()

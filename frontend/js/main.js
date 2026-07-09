@@ -24,7 +24,9 @@ const statSize = document.getElementById("stat-size");
 
 const aboutName = document.getElementById("about-name");
 const aboutDesc = document.getElementById("about-desc");
-const aboutTime = document.getElementById("about-time");
+const aboutTimeBest = document.getElementById("about-time-best");
+const aboutTimeAvg = document.getElementById("about-time-avg");
+const aboutTimeWorst = document.getElementById("about-time-worst");
 const aboutSpace = document.getElementById("about-space");
 const aboutStable = document.getElementById("about-stable");
 const aboutInplace = document.getElementById("about-inplace");
@@ -43,33 +45,39 @@ document.querySelectorAll(".nav-item.disabled").forEach((el) => {
 const ALGO_INFO = {
   bubble: {
     name: "Bubble Sort",
-    desc: "Repeatedly steps through the array, swapping adjacent elements that are out of order, until nothing more needs swapping.",
-    time: "O(n\u00b2)", space: "O(1)", stable: true, inPlace: true
+    desc: "Repeatedly steps through the array, swapping adjacent elements that are out of order. Stops early the moment a full pass makes no swaps, which is what gives it a linear best case.",
+    bestTime: "O(n)", avgTime: "O(n\u00b2)", worstTime: "O(n\u00b2)",
+    space: "O(1)", stable: true, inPlace: true
   },
   selection: {
     name: "Selection Sort",
-    desc: "Finds the smallest remaining value on each pass and swaps it into place, building the sorted portion from the front.",
-    time: "O(n\u00b2)", space: "O(1)", stable: false, inPlace: true
+    desc: "Finds the smallest remaining value on each pass and swaps it into place. It always scans every remaining element, so input order never speeds it up.",
+    bestTime: "O(n\u00b2)", avgTime: "O(n\u00b2)", worstTime: "O(n\u00b2)",
+    space: "O(1)", stable: false, inPlace: true
   },
   insertion: {
     name: "Insertion Sort",
-    desc: "Takes each element and slides it backward into its correct position among the already-sorted elements before it.",
-    time: "O(n\u00b2)", space: "O(1)", stable: true, inPlace: true
+    desc: "Takes each element and slides it backward into its correct position among the already-sorted elements before it. Nearly-sorted input needs very little shifting.",
+    bestTime: "O(n)", avgTime: "O(n\u00b2)", worstTime: "O(n\u00b2)",
+    space: "O(1)", stable: true, inPlace: true
   },
   merge: {
     name: "Merge Sort",
-    desc: "Splits the array in half again and again until each piece has one element, then merges them back in sorted order. The pink bar marks the current midpoint being merged around.",
-    time: "O(n log n)", space: "O(n)", stable: true, inPlace: false
+    desc: "Splits the array in half again and again until each piece has one element, then merges them back in sorted order. The pink bar marks the current midpoint being merged around. Consistent no matter the input.",
+    bestTime: "O(n log n)", avgTime: "O(n log n)", worstTime: "O(n log n)",
+    space: "O(n)", stable: true, inPlace: false
   },
   quick: {
     name: "Quick Sort",
-    desc: "Picks a pivot (shown in pink), partitions everything smaller to its left and larger to its right, then repeats on each side.",
-    time: "O(n log n)", space: "O(log n)", stable: false, inPlace: true
+    desc: "Picks a pivot (shown in pink, always the last element here), partitions everything smaller to its left and larger to its right, then repeats. That fixed pivot choice means an already-sorted array triggers its O(n\u00b2) worst case \u2014 try it and watch.",
+    bestTime: "O(n log n)", avgTime: "O(n log n)", worstTime: "O(n\u00b2)",
+    space: "O(log n)", stable: false, inPlace: true
   },
   heap: {
     name: "Heap Sort",
-    desc: "Builds a max-heap from the array, then repeatedly swaps the largest value to the end and shrinks the heap.",
-    time: "O(n log n)", space: "O(1)", stable: false, inPlace: true
+    desc: "Builds a max-heap from the array, then repeatedly swaps the largest value to the end and shrinks the heap. Consistent no matter the input.",
+    bestTime: "O(n log n)", avgTime: "O(n log n)", worstTime: "O(n log n)",
+    space: "O(1)", stable: false, inPlace: true
   }
 };
 
@@ -202,11 +210,22 @@ function updateNavButtons() {
   nextStepBtn.disabled = currentSteps.length === 0 || currentStepIndex >= currentSteps.length - 1;
 }
 
+// --- About card ---
+function toSup(str) {
+  return str.replace("\u00b2", "&sup2;");
+}
+
 function updateAboutCard(algorithm) {
   const info = ALGO_INFO[algorithm];
   aboutName.textContent = info.name;
   aboutDesc.textContent = info.desc;
-  aboutTime.innerHTML = info.time.replace("\u00b2", "&sup2;");
+  aboutTimeBest.innerHTML = toSup(info.bestTime);
+  aboutTimeAvg.innerHTML = toSup(info.avgTime);
+  aboutTimeWorst.innerHTML = toSup(info.worstTime);
+  const hasGap = info.bestTime !== info.worstTime;
+  aboutTimeBest.className = hasGap ? "ok-text" : "";
+  aboutTimeWorst.className = hasGap ? "warn-text" : "";
+  aboutTimeAvg.className = "";
   aboutSpace.textContent = info.space;
   aboutStable.textContent = info.stable ? "Yes" : "No";
   aboutStable.className = info.stable ? "ok-text" : "warn-text";

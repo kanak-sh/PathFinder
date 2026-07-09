@@ -571,6 +571,55 @@ input[type="range"]:disabled {
   color: #26215C;
 }
 
+.complexity-block {
+  padding: 9px 0;
+  border-top: 1px solid #f5f4ee;
+}
+
+.complexity-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #b4b2a9;
+  margin: 0 0 8px;
+}
+
+.complexity-label svg {
+  width: 30px;
+  height: 30px;
+  padding: 8px;
+  border-radius: 50%;
+  background: #EEEDFE;
+  color: #534AB7;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.complexity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding-left: 38px;
+}
+
+.complexity-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.complexity-grid span {
+  font-size: 10px;
+  color: #b4b2a9;
+}
+
+.complexity-grid strong {
+  font-size: 12px;
+  font-weight: 500;
+  color: #26215C;
+}
+
 .about-stat-icon {
   width: 30px;
   height: 30px;
