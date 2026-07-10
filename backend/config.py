@@ -14,6 +14,6 @@ class Config:
     PORT = int(os.getenv("FLASK_PORT", 5000))
 
     DB_HOST = os.getenv("DB_HOST", "localhost")
-    DB_USER = os.getenv("DB_USER", "root")
-    DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+    DB_USER = os.getenv("DB_USER", "pathfinder_app")
+    DB_PASSWORD = os.getenv("DB_PASSWORD", "pathfinder_app_pw")
     DB_NAME = os.getenv("DB_NAME", "pathfinder")

@@ -3,6 +3,8 @@ from flask_cors import CORS
 from config import Config
 from routes.sorting import sorting_bp
 from routes.pathfinding import pathfinding_bp
+from routes.benchmark import benchmark_bp
+from db import init_db
 
 def create_app():
     app = Flask(__name__)
@@ -18,9 +20,12 @@ def create_app():
 
     app.register_blueprint(sorting_bp, url_prefix="/api/sorting")
     app.register_blueprint(pathfinding_bp, url_prefix="/api/pathfinding")
+    app.register_blueprint(benchmark_bp, url_prefix="/api/benchmark")
 
-    # Route blueprints for benchmarks and history will be registered
-    # here in later phases.
+    # Route blueprint for History Dashboard queries will be registered
+    # here in a later phase (it reuses the same 'benchmarks' table).
+
+    init_db()
 
     return app
 
