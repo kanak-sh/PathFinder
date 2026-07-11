@@ -55,11 +55,21 @@ async function runBenchmark(algorithm, inputSize, arrayType = "random") {
   return response.json();
 }
 
-async function fetchBenchmarkHistory(algorithm = null, limit = 50) {
-  const params = new URLSearchParams({ limit });
+async function fetchBenchmarkHistory(algorithm = null, limit = 50, offset = 0) {
+  const params = new URLSearchParams({ limit, offset });
   if (algorithm) params.set("algorithm", algorithm);
 
   const response = await fetch(`${API_BASE_URL}/benchmark/history?${params}`);
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(errorBody.error || `Backend responded with status ${response.status}`);
+  }
+
+  return response.json();
+}
+
+async function fetchBenchmarkStats() {
+  const response = await fetch(`${API_BASE_URL}/benchmark/stats`);
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));
     throw new Error(errorBody.error || `Backend responded with status ${response.status}`);
