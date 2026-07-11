@@ -39,3 +39,31 @@ async function runPathfind(algorithm, grid, start, end) {
 
   return response.json();
 }
+
+async function runBenchmark(algorithm, inputSize, arrayType = "random") {
+  const response = await fetch(`${API_BASE_URL}/benchmark/run`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ algorithm, input_size: inputSize, array_type: arrayType })
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(errorBody.error || `Backend responded with status ${response.status}`);
+  }
+
+  return response.json();
+}
+
+async function fetchBenchmarkHistory(algorithm = null, limit = 50) {
+  const params = new URLSearchParams({ limit });
+  if (algorithm) params.set("algorithm", algorithm);
+
+  const response = await fetch(`${API_BASE_URL}/benchmark/history?${params}`);
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(errorBody.error || `Backend responded with status ${response.status}`);
+  }
+
+  return response.json();
+}
