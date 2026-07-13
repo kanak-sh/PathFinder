@@ -94,6 +94,16 @@
                     <span id="speed-value">3x</span>
                   </div>
                 </label>
+                <label>
+                  Array type
+                  <select id="array-type-select" class="algo-select">
+                    <option value="random">Random</option>
+                    <option value="sorted">Already sorted</option>
+                    <option value="reverse">Reverse sorted</option>
+                    <option value="nearly_sorted">Nearly sorted</option>
+                    <option value="duplicates">Duplicate-heavy</option>
+                  </select>
+                </label>
               </div>
               <div class="button-row">
                 <button id="generate-btn" class="btn-soft">
@@ -114,6 +124,18 @@
             </div>
 
             <div id="array-container" class="array-container"></div>
+
+            <div class="custom-input-row">
+              <input type="text" id="custom-input-field" class="custom-input-field"
+                     placeholder="Enter your own numbers, comma-separated e.g. 8, 3, 19, 5, 42" />
+              <button id="custom-use-btn" class="btn-soft">Use array</button>
+              <button id="custom-upload-btn" class="btn-soft">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload .csv/.txt
+              </button>
+              <input type="file" id="custom-file-input" accept=".csv,.txt" style="display:none;" />
+            </div>
+            <p class="custom-input-hint" id="custom-input-hint">Numbers can be separated by commas, spaces, or new lines. Max 300 values.</p>
 
             <div class="legend">
               <span><i class="dot dot-unsorted"></i>Unsorted</span>

@@ -10,6 +10,12 @@ const speedValueLabel = document.getElementById("speed-value");
 const generateBtn = document.getElementById("generate-btn");
 const resetBtn = document.getElementById("reset-btn");
 const skipEndBtn = document.getElementById("skip-end-btn");
+const arrayTypeSelect = document.getElementById("array-type-select");
+const customInputField = document.getElementById("custom-input-field");
+const customUseBtn = document.getElementById("custom-use-btn");
+const customUploadBtn = document.getElementById("custom-upload-btn");
+const customFileInput = document.getElementById("custom-file-input");
+const customInputHint = document.getElementById("custom-input-hint");
 const runBtn = document.getElementById("run-btn");
 const runBtnIcon = document.getElementById("run-btn-icon");
 const runBtnLabel = document.getElementById("run-btn-label");
@@ -35,6 +41,7 @@ const PLAY_ICON = '<polygon points="6 4 20 12 6 20"/>';
 const PAUSE_ICON = '<rect x="5" y="4" width="5" height="16"/><rect x="14" y="4" width="5" height="16"/>';
 const SPEED_INTERVALS = { 1: 650, 2: 400, 3: 220, 4: 110, 5: 40 };
 
+// Disabled nav items: show a gentle alert instead of doing nothing silently.
 document.querySelectorAll(".nav-item.disabled").forEach((el) => {
   el.addEventListener("click", (e) => {
     e.preventDefault();
@@ -87,6 +94,7 @@ let currentSteps = [];
 let currentStepIndex = -1;
 let playTimer = null;
 
+// --- Backend connectivity check ---
 pingBackend()
   .then((data) => {
     statusEl.textContent = `Connected: ${data.message}`;
@@ -98,6 +106,7 @@ pingBackend()
     console.error(err);
   });
 
+// --- Array generation ---
 function generateRandomArray(size) {
   const arr = [];
   for (let i = 0; i < size; i++) {
@@ -106,6 +115,77 @@ function generateRandomArray(size) {
   return arr;
 }
 
+function evenlySpacedArray(size) {
+  if (size <= 1) return [50];
+  const min = 5, max = 99;
+  return Array.from({ length: size }, (_, i) => Math.round(min + ((max - min) * i) / (size - 1)));
+}
+
+function generateArrayByType(type, size) {
+  switch (type) {
+    case "sorted":
+      return evenlySpacedArray(size);
+    case "reverse":
+      return evenlySpacedArray(size).reverse();
+    case "nearly_sorted": {
+      const arr = evenlySpacedArray(size);
+      const swaps = Math.max(1, Math.floor(size / 20));
+      for (let i = 0; i < swaps; i++) {
+        const a = Math.floor(Math.random() * size);
+        const b = Math.floor(Math.random() * size);
+        [arr[a], arr[b]] = [arr[b], arr[a]];
+      }
+      return arr;
+    }
+    case "duplicates": {
+      const poolSize = Math.max(2, Math.floor(size / 10));
+      const pool = evenlySpacedArray(poolSize);
+      return Array.from({ length: size }, () => pool[Math.floor(Math.random() * poolSize)]);
+    }
+    default:
+      return generateRandomArray(size);
+  }
+}
+
+// --- Custom input parsing ---
+const MAX_CUSTOM_VALUES = 300;
+
+function parseCustomInput(text) {
+  const parts = text.split(/[,\s]+/).map(s => s.trim()).filter(s => s.length > 0);
+  if (parts.length === 0) {
+    return { error: "Enter at least one number." };
+  }
+  if (parts.length > MAX_CUSTOM_VALUES) {
+    return { error: `Too many values (${parts.length}). Max is ${MAX_CUSTOM_VALUES}.` };
+  }
+  const numbers = [];
+  for (const part of parts) {
+    const n = Number(part);
+    if (!Number.isFinite(n)) {
+      return { error: `"${part}" isn't a valid number.` };
+    }
+    numbers.push(n);
+  }
+  return { values: numbers };
+}
+
+function applyCustomArray(values) {
+  currentArray = values;
+  currentSteps = [];
+  currentStepIndex = -1;
+  sizeSlider.value = Math.min(Math.max(values.length, parseInt(sizeSlider.min, 10)), parseInt(sizeSlider.max, 10));
+  sizeValueLabel.textContent = values.length;
+  renderStep(-1);
+  statComparisons.textContent = "-";
+  statSwaps.textContent = "-";
+  statTime.textContent = "-";
+  statSize.textContent = values.length;
+  customInputHint.textContent = `Using your ${values.length}-value array. Numbers can be separated by commas, spaces, or new lines.`;
+  customInputHint.classList.remove("error");
+}
+
+// --- Determine each bar's visual class for a given step ---
+// Priority: sorted (lowest) < pivot/mid < comparing/active (highest, transient)
 function computeBarClasses(step, arrayLength) {
   const classes = new Array(arrayLength).fill("");
 
@@ -131,16 +211,20 @@ function computeBarClasses(step, arrayLength) {
   return classes;
 }
 
+// --- Rendering ---
 function renderArray(array, classesArray = []) {
   arrayContainer.innerHTML = "";
+  const min = Math.min(...array, 0);
   const max = Math.max(...array, 1);
+  const range = (max - min) || 1;
 
   array.forEach((value, index) => {
     const bar = document.createElement("div");
     bar.className = "bar" + (classesArray[index] ? ` ${classesArray[index]}` : "");
-    bar.style.height = `${(value / max) * 100}%`;
+    const heightPct = Math.max(4, ((value - min) / range) * 100);
+    bar.style.height = `${heightPct}%`;
 
-    bar.addEventListener("mouseenter", () => {
+    bar.addEventListener("mouseenter", (e) => {
       barTooltip.textContent = value;
       barTooltip.style.display = "block";
     });
@@ -233,6 +317,7 @@ function updateAboutCard(algorithm) {
   aboutInplace.className = info.inPlace ? "ok-text" : "warn-text";
 }
 
+// --- Keep pills + quick-algo buttons + about card all in sync ---
 function selectAlgorithm(algorithm) {
   if (isPlaying()) stopPlaying();
 
@@ -266,6 +351,7 @@ quickAlgoGrid.addEventListener("click", (e) => {
   selectAlgorithm(btn.dataset.algorithm);
 });
 
+// --- Sliders ---
 sizeSlider.addEventListener("input", () => {
   sizeValueLabel.textContent = sizeSlider.value;
 });
@@ -274,9 +360,10 @@ speedSlider.addEventListener("input", () => {
   speedValueLabel.textContent = `${speedSlider.value}x`;
 });
 
+// --- Generate / Shuffle ---
 generateBtn.addEventListener("click", () => {
   if (isPlaying()) stopPlaying();
-  currentArray = generateRandomArray(parseInt(sizeSlider.value, 10));
+  currentArray = generateArrayByType(arrayTypeSelect.value, parseInt(sizeSlider.value, 10));
   currentSteps = [];
   currentStepIndex = -1;
   renderStep(-1);
@@ -284,13 +371,60 @@ generateBtn.addEventListener("click", () => {
   statSwaps.textContent = "-";
   statTime.textContent = "-";
   statSize.textContent = currentArray.length;
+  customInputHint.textContent = "Numbers can be separated by commas, spaces, or new lines. Max 300 values.";
+  customInputHint.classList.remove("error");
 });
 
+// --- Custom input: manual entry ---
+customUseBtn.addEventListener("click", () => {
+  if (isPlaying()) stopPlaying();
+  const result = parseCustomInput(customInputField.value);
+  if (result.error) {
+    customInputHint.textContent = result.error;
+    customInputHint.classList.add("error");
+    return;
+  }
+  applyCustomArray(result.values);
+});
+
+customInputField.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") customUseBtn.click();
+});
+
+// --- Custom input: file upload ---
+customUploadBtn.addEventListener("click", () => customFileInput.click());
+
+customFileInput.addEventListener("change", () => {
+  const file = customFileInput.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    if (isPlaying()) stopPlaying();
+    const result = parseCustomInput(reader.result);
+    if (result.error) {
+      customInputHint.textContent = `${file.name}: ${result.error}`;
+      customInputHint.classList.add("error");
+      return;
+    }
+    customInputField.value = result.values.join(", ");
+    applyCustomArray(result.values);
+  };
+  reader.onerror = () => {
+    customInputHint.textContent = `Could not read ${file.name}.`;
+    customInputHint.classList.add("error");
+  };
+  reader.readAsText(file);
+  customFileInput.value = "";
+});
+
+// --- Reset (back to original unsorted array, keep steps if already run) ---
 resetBtn.addEventListener("click", () => {
   if (isPlaying()) stopPlaying();
   renderStep(-1);
 });
 
+// --- Jump to end (skip straight to the sorted result) ---
 skipEndBtn.addEventListener("click", () => {
   if (isPlaying()) stopPlaying();
   if (currentSteps.length === 0) {
@@ -300,6 +434,7 @@ skipEndBtn.addEventListener("click", () => {
   renderStep(currentSteps.length - 1);
 });
 
+// --- Auto-play ---
 function isPlaying() {
   return playTimer !== null;
 }
@@ -333,12 +468,14 @@ function stopPlaying() {
   pillsContainer.querySelectorAll(".pill").forEach((p) => p.disabled = false);
 }
 
+// --- Run / Play / Pause ---
 runBtn.addEventListener("click", async () => {
   if (isPlaying()) {
     stopPlaying();
     return;
   }
 
+  // Already have steps loaded (paused mid-way, or finished) -> just resume/replay.
   if (currentSteps.length > 0) {
     if (currentStepIndex >= currentSteps.length - 1) {
       renderStep(0);
@@ -370,6 +507,7 @@ runBtn.addEventListener("click", async () => {
   }
 });
 
+// --- Manual step navigation (also pauses auto-play) ---
 prevStepBtn.addEventListener("click", () => {
   if (isPlaying()) stopPlaying();
   renderStep(currentStepIndex - 1);
@@ -379,6 +517,7 @@ nextStepBtn.addEventListener("click", () => {
   renderStep(currentStepIndex + 1);
 });
 
+// --- Initial state on page load ---
 currentArray = generateRandomArray(parseInt(sizeSlider.value, 10));
 renderStep(-1);
 statSize.textContent = currentArray.length;
