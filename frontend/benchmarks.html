@@ -66,7 +66,12 @@
         </div>
       </div>
 
-      <section class="visualizer-panel">
+      <section class="algo-pills" id="category-tabs" style="margin-bottom:1rem;">
+        <button class="pill pill-merge active" data-category="sorting">Sorting algorithms</button>
+        <button class="pill pill-quick" data-category="pathfinding">Pathfinding algorithms</button>
+      </section>
+
+      <section class="visualizer-panel" id="sorting-controls">
         <div class="bench-controls">
           <div>
             <p class="bench-section-label">Algorithms</p>
@@ -104,25 +109,69 @@
                 <option value="duplicates">Duplicate-heavy</option>
               </select>
             </label>
-            <button id="run-btn" class="btn-solid">
-              <svg id="run-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20"/></svg>
-              <span id="run-btn-label">Run Benchmark</span>
-            </button>
           </div>
 
           <p class="bench-warning">O(n&sup2;) algorithms (Bubble, Selection, Insertion) get slow above ~2000 elements &mdash; that's the point, but it means the run will take longer.</p>
         </div>
+      </section>
 
-        <div class="bench-progress" id="bench-progress" style="display:none;">
-          <div class="bench-progress-bar"><div class="bench-progress-fill" id="bench-progress-fill"></div></div>
-          <p id="bench-progress-text">Running...</p>
+      <section class="visualizer-panel" id="pathfinding-controls" style="display:none;">
+        <div class="bench-controls">
+          <div>
+            <p class="bench-section-label">Algorithms</p>
+            <div class="algo-checks" id="pf-algo-checks">
+              <label class="check-pill"><input type="checkbox" value="bfs" checked>BFS</label>
+              <label class="check-pill"><input type="checkbox" value="dfs" checked>DFS</label>
+              <label class="check-pill"><input type="checkbox" value="dijkstra" checked>Dijkstra</label>
+              <label class="check-pill"><input type="checkbox" value="astar" checked>A*</label>
+              <label class="check-pill"><input type="checkbox" value="greedy" checked>Greedy</label>
+            </div>
+          </div>
+
+          <div>
+            <p class="bench-section-label">Grid sizes (n &times; n)</p>
+            <div class="algo-checks" id="pf-size-checks">
+              <label class="check-pill"><input type="checkbox" value="10" checked>10</label>
+              <label class="check-pill"><input type="checkbox" value="20" checked>20</label>
+              <label class="check-pill"><input type="checkbox" value="35" checked>35</label>
+              <label class="check-pill"><input type="checkbox" value="50" checked>50</label>
+              <label class="check-pill"><input type="checkbox" value="75">75</label>
+              <label class="check-pill"><input type="checkbox" value="100">100</label>
+              <label class="check-pill"><input type="checkbox" value="150">150</label>
+            </div>
+          </div>
+
+          <div class="bench-row-2">
+            <label class="bench-select-label">
+              Wall density
+              <select id="pf-density-select" class="algo-select">
+                <option value="sparse">Sparse (open)</option>
+                <option value="maze">Maze-like</option>
+                <option value="dense">Dense</option>
+              </select>
+            </label>
+          </div>
+
+          <p class="bench-warning">Grids are regenerated per run and guaranteed solvable, so results are always comparable &mdash; no wasted runs on unreachable mazes.</p>
         </div>
       </section>
+
+      <div class="bench-row-2" style="margin-bottom:1rem;">
+        <button id="run-btn" class="btn-solid">
+          <svg id="run-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20"/></svg>
+          <span id="run-btn-label">Run Benchmark</span>
+        </button>
+      </div>
+
+      <div class="bench-progress" id="bench-progress" style="display:none;">
+        <div class="bench-progress-bar"><div class="bench-progress-fill" id="bench-progress-fill"></div></div>
+        <p id="bench-progress-text">Running...</p>
+      </div>
 
       <section class="visualizer-panel" id="chart-panel" style="display:none;">
         <div class="chart-tabs" id="chart-tabs">
           <button class="chart-tab active" data-metric="execution_time_ms">Time (ms)</button>
-          <button class="chart-tab" data-metric="comparisons">Comparisons</button>
+          <button class="chart-tab" data-metric="comparisons" id="tab-comparisons">Comparisons</button>
           <button class="chart-tab" data-metric="memory_kb">Memory (KB)</button>
         </div>
         <div id="chart-container"></div>
@@ -133,7 +182,7 @@
         <p class="quick-algo-title">Raw results</p>
         <div class="bench-table-wrap">
           <table class="bench-table" id="results-table">
-            <thead>
+            <thead id="results-thead">
               <tr><th>Algorithm</th><th>Size</th><th>Type</th><th>Comparisons</th><th>Swaps</th><th>Time (ms)</th><th>Memory (KB)</th></tr>
             </thead>
             <tbody id="results-tbody"></tbody>

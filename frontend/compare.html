@@ -66,7 +66,12 @@
         </div>
       </div>
 
-      <section class="visualizer-panel">
+      <section class="algo-pills" id="category-tabs" style="margin-bottom:1rem;">
+        <button class="pill pill-merge active" data-category="sorting">Sorting algorithms</button>
+        <button class="pill pill-quick" data-category="pathfinding">Pathfinding algorithms</button>
+      </section>
+
+      <section class="visualizer-panel" id="sorting-panel-controls">
         <div class="panel-controls">
           <div class="slider-group">
             <label>
@@ -111,13 +116,64 @@
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="8" cy="8" r="0.8" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="0.8" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="0.8" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="0.8" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg>
               Shuffle
             </button>
-            <button id="run-btn" class="btn-solid">
-              <svg id="run-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20"/></svg>
-              <span id="run-btn-label">Race</span>
-            </button>
           </div>
         </div>
       </section>
+
+      <section class="visualizer-panel" id="pathfinding-panel-controls" style="display:none;">
+        <div class="panel-controls">
+          <div class="slider-group">
+            <label>
+              Algorithm A
+              <select id="pf-algo-a-select" class="algo-select">
+                <option value="bfs" selected>BFS</option>
+                <option value="dfs">DFS</option>
+                <option value="dijkstra">Dijkstra</option>
+                <option value="astar">A*</option>
+                <option value="greedy">Greedy Best-First</option>
+              </select>
+            </label>
+            <label>
+              Algorithm B
+              <select id="pf-algo-b-select" class="algo-select">
+                <option value="bfs">BFS</option>
+                <option value="dfs">DFS</option>
+                <option value="dijkstra">Dijkstra</option>
+                <option value="astar" selected>A*</option>
+                <option value="greedy">Greedy Best-First</option>
+              </select>
+            </label>
+            <label>
+              Grid size
+              <div class="slider-row">
+                <input type="range" id="pf-size-slider" min="10" max="30" value="18" />
+                <span id="pf-size-value">18</span>
+              </div>
+            </label>
+            <label>
+              Speed
+              <div class="slider-row">
+                <input type="range" id="pf-speed-slider" min="1" max="5" value="3" />
+                <span id="pf-speed-value">3x</span>
+              </div>
+            </label>
+          </div>
+          <div class="button-row">
+            <button id="pf-maze-btn" class="btn-soft">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="8" cy="8" r="0.8" fill="currentColor" stroke="none"/><circle cx="16" cy="8" r="0.8" fill="currentColor" stroke="none"/><circle cx="8" cy="16" r="0.8" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="0.8" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg>
+              New maze
+            </button>
+          </div>
+        </div>
+        <p class="grid-hint">Start (top-left) and end (bottom-right) are fixed for a fair race &mdash; both algorithms search the identical maze.</p>
+      </section>
+
+      <div class="bench-row-2" style="margin-bottom:1rem;">
+        <button id="run-btn" class="btn-solid">
+          <svg id="run-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20"/></svg>
+          <span id="run-btn-label">Race</span>
+        </button>
+      </div>
 
       <div class="compare-grid">
         <div class="compare-panel">
@@ -127,9 +183,10 @@
             <span class="compare-status" id="panel-a-status">Waiting</span>
           </div>
           <div id="array-container-a" class="array-container compare-array"></div>
+          <div id="grid-container-a" class="grid-container compare-array" style="display:none;"></div>
           <div class="compare-stats">
-            <div><span>Comparisons</span><strong id="stat-a-comparisons">-</strong></div>
-            <div><span>Swaps</span><strong id="stat-a-swaps">-</strong></div>
+            <div><span id="label-a-1">Comparisons</span><strong id="stat-a-1">-</strong></div>
+            <div><span id="label-a-2">Swaps</span><strong id="stat-a-2">-</strong></div>
             <div><span>Time</span><strong id="stat-a-time">-</strong></div>
             <div><span>Steps</span><strong id="stat-a-steps">-</strong></div>
           </div>
@@ -142,9 +199,10 @@
             <span class="compare-status" id="panel-b-status">Waiting</span>
           </div>
           <div id="array-container-b" class="array-container compare-array"></div>
+          <div id="grid-container-b" class="grid-container compare-array" style="display:none;"></div>
           <div class="compare-stats">
-            <div><span>Comparisons</span><strong id="stat-b-comparisons">-</strong></div>
-            <div><span>Swaps</span><strong id="stat-b-swaps">-</strong></div>
+            <div><span id="label-b-1">Comparisons</span><strong id="stat-b-1">-</strong></div>
+            <div><span id="label-b-2">Swaps</span><strong id="stat-b-2">-</strong></div>
             <div><span>Time</span><strong id="stat-b-time">-</strong></div>
             <div><span>Steps</span><strong id="stat-b-steps">-</strong></div>
           </div>

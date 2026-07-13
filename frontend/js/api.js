@@ -55,9 +55,10 @@ async function runBenchmark(algorithm, inputSize, arrayType = "random") {
   return response.json();
 }
 
-async function fetchBenchmarkHistory(algorithm = null, limit = 50, offset = 0) {
+async function fetchBenchmarkHistory(algorithm = null, limit = 50, offset = 0, category = null) {
   const params = new URLSearchParams({ limit, offset });
   if (algorithm) params.set("algorithm", algorithm);
+  if (category) params.set("category", category);
 
   const response = await fetch(`${API_BASE_URL}/benchmark/history?${params}`);
   if (!response.ok) {
@@ -68,8 +69,11 @@ async function fetchBenchmarkHistory(algorithm = null, limit = 50, offset = 0) {
   return response.json();
 }
 
-async function fetchBenchmarkStats() {
-  const response = await fetch(`${API_BASE_URL}/benchmark/stats`);
+async function fetchBenchmarkStats(category = null) {
+  const params = new URLSearchParams();
+  if (category) params.set("category", category);
+
+  const response = await fetch(`${API_BASE_URL}/benchmark/stats?${params}`);
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));
     throw new Error(errorBody.error || `Backend responded with status ${response.status}`);

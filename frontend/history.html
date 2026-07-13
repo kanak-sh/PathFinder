@@ -66,6 +66,11 @@
         </div>
       </div>
 
+      <section class="algo-pills" id="category-tabs" style="margin-bottom:1rem;">
+        <button class="pill pill-merge active" data-category="sorting">Sorting algorithms</button>
+        <button class="pill pill-quick" data-category="pathfinding">Pathfinding algorithms</button>
+      </section>
+
       <section class="stats-grid" id="summary-stats" style="margin-bottom:1rem;">
         <div class="stat-card stat-purple">
           <p><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Total runs</p>
@@ -108,18 +113,12 @@
             Filter by algorithm
             <select id="filter-select" class="algo-select">
               <option value="">All algorithms</option>
-              <option value="bubble">Bubble</option>
-              <option value="selection">Selection</option>
-              <option value="insertion">Insertion</option>
-              <option value="merge">Merge</option>
-              <option value="quick">Quick</option>
-              <option value="heap">Heap</option>
             </select>
           </label>
         </div>
         <div class="bench-table-wrap">
           <table class="bench-table" id="runs-table">
-            <thead>
+            <thead id="runs-thead">
               <tr><th>Algorithm</th><th>Size</th><th>Type</th><th>Comparisons</th><th>Swaps</th><th>Time (ms)</th><th>Memory (KB)</th><th>When</th></tr>
             </thead>
             <tbody id="runs-tbody"></tbody>

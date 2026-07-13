@@ -848,6 +848,12 @@ input[type="range"]:disabled {
   margin-bottom: 10px;
 }
 
+.grid-container.compare-array {
+  height: auto;
+  max-height: 260px;
+  overflow: hidden;
+}
+
 .compare-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
