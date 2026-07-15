@@ -1,9 +1,9 @@
 const statusEl = document.getElementById("status");
 const gridContainer = document.getElementById("grid-container");
-const pillsContainer = document.getElementById("algo-pills");
+const themeToggleBtn = document.getElementById("theme-toggle-btn");
+const algoSelect = document.getElementById("algo-select");
 const quickAlgoGrid = document.querySelector(".quick-algo-grid");
-const sizeSlider = document.getElementById("size-slider");
-const sizeValueLabel = document.getElementById("size-value");
+const sizeSelect = document.getElementById("size-select");
 const speedSlider = document.getElementById("speed-slider");
 const speedValueLabel = document.getElementById("speed-value");
 const mazeBtn = document.getElementById("maze-btn");
@@ -14,10 +14,10 @@ const runBtnIcon = document.getElementById("run-btn-icon");
 const runBtnLabel = document.getElementById("run-btn-label");
 const stepCountEl = document.getElementById("step-count");
 const stepDescEl = document.getElementById("step-desc");
+const statSteps = document.getElementById("stat-steps");
 const statVisited = document.getElementById("stat-visited");
 const statPathlen = document.getElementById("stat-pathlen");
 const statTime = document.getElementById("stat-time");
-const statFound = document.getElementById("stat-found");
 
 const aboutName = document.getElementById("about-name");
 const aboutDesc = document.getElementById("about-desc");
@@ -29,12 +29,17 @@ const aboutHeuristic = document.getElementById("about-heuristic");
 const PLAY_ICON = '<polygon points="6 4 20 12 6 20"/>';
 const PAUSE_ICON = '<rect x="5" y="4" width="5" height="16"/><rect x="14" y="4" width="5" height="16"/>';
 const SPEED_INTERVALS = { 1: 120, 2: 60, 3: 30, 4: 12, 5: 3 };
+const SPEED_LABELS = { 1: "Very slow", 2: "Slow", 3: "Medium", 4: "Fast", 5: "Very fast" };
 
 document.querySelectorAll(".nav-item.disabled").forEach((el) => {
   el.addEventListener("click", (e) => {
     e.preventDefault();
     alert(el.dataset.tooltip || "This page isn't built yet.");
   });
+});
+
+if (themeToggleBtn) themeToggleBtn.addEventListener("click", () => {
+  alert("Dark mode is coming in the visual polish pass — this toggle is a placeholder for now.");
 });
 
 const ALGO_INFO = {
@@ -54,7 +59,7 @@ const ALGO_INFO = {
     time: "O((V+E) log V)", space: "O(V)", optimal: "Yes (cost)", heuristic: false
   },
   astar: {
-    name: "A*",
+    name: "A* Search",
     desc: "Like Dijkstra, but guided toward the goal by a distance estimate. Same optimal-cost guarantee, usually visiting far fewer nodes.",
     time: "O((V+E) log V)", space: "O(V)", optimal: "Yes (cost)", heuristic: true
   },
@@ -65,7 +70,7 @@ const ALGO_INFO = {
   }
 };
 
-let cols = parseInt(sizeSlider.value, 10);
+let cols = parseInt(sizeSelect.value, 10);
 let rows = Math.max(8, Math.round(cols * 0.5));
 let grid = [];
 let cellElements = [];
@@ -73,7 +78,7 @@ let stepClasses = [];
 let startPos = [0, 0];
 let endPos = [0, 0];
 
-let currentAlgorithm = "bfs";
+let currentAlgorithm = algoSelect.value;
 let currentSteps = [];
 let currentStepIndex = -1;
 let playTimer = null;
@@ -113,6 +118,7 @@ function cellClassFor(r, c) {
 }
 
 function buildGrid() {
+  removePathOverlay();
   gridContainer.innerHTML = "";
   gridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
   cellElements = [];
@@ -200,19 +206,67 @@ window.addEventListener("mouseup", () => {
   }
 });
 
+// --- Path line overlay ---
+function removePathOverlay() {
+  const existing = gridContainer.querySelector(".path-overlay");
+  if (existing) existing.remove();
+}
+
+function drawPathOverlay(path) {
+  removePathOverlay();
+  if (!path || path.length < 2) return;
+
+  const containerRect = gridContainer.getBoundingClientRect();
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.classList.add("path-overlay");
+  svg.setAttribute("width", containerRect.width);
+  svg.setAttribute("height", containerRect.height);
+
+  const points = path.map(([r, c]) => {
+    const rect = cellElements[r][c].getBoundingClientRect();
+    return [
+      rect.left - containerRect.left + rect.width / 2,
+      rect.top - containerRect.top + rect.height / 2
+    ];
+  });
+
+  const polyline = document.createElementNS(svgNS, "polyline");
+  polyline.setAttribute("points", points.map(p => p.join(",")).join(" "));
+  polyline.setAttribute("fill", "none");
+  polyline.setAttribute("stroke", "#534AB7");
+  polyline.setAttribute("stroke-width", "3");
+  polyline.setAttribute("stroke-linecap", "round");
+  polyline.setAttribute("stroke-linejoin", "round");
+  svg.appendChild(polyline);
+
+  points.forEach(([x, y], i) => {
+    if (i === 0 || i === points.length - 1) return; // start/end already have their own markers
+    const circle = document.createElementNS(svgNS, "circle");
+    circle.setAttribute("cx", x);
+    circle.setAttribute("cy", y);
+    circle.setAttribute("r", 3.2);
+    circle.setAttribute("fill", "#534AB7");
+    svg.appendChild(circle);
+  });
+
+  gridContainer.appendChild(svg);
+}
+
 // --- Animation ---
 function clearAnimation() {
   if (isPlaying()) stopPlaying();
   stepClasses = Array.from({ length: rows }, () => Array(cols).fill(""));
   currentSteps = [];
   currentStepIndex = -1;
+  removePathOverlay();
   refreshAllCellClasses();
   stepCountEl.textContent = "Step 0 / 0";
-  stepDescEl.textContent = "Draw some walls (optional) and hit Go to begin.";
+  stepDescEl.textContent = "Draw some walls (optional) and hit Start to begin.";
+  statSteps.textContent = "-";
   statVisited.textContent = "-";
   statPathlen.textContent = "-";
   statTime.textContent = "-";
-  statFound.textContent = "-";
 }
 
 function describeStep(step) {
@@ -239,6 +293,7 @@ function applyStep(step) {
         cellElements[r][c].className = "cell " + cellClassFor(r, c);
       }
     });
+    drawPathOverlay(step.path);
   }
 }
 
@@ -259,9 +314,7 @@ function selectAlgorithm(algorithm) {
   currentAlgorithm = algorithm;
   needsRefetch = true;
 
-  pillsContainer.querySelectorAll(".pill").forEach((p) => {
-    p.classList.toggle("active", p.dataset.algorithm === algorithm);
-  });
+  algoSelect.value = algorithm;
   quickAlgoGrid.querySelectorAll(".quick-btn").forEach((b) => {
     b.classList.toggle("active", b.dataset.algorithm === algorithm);
   });
@@ -269,11 +322,7 @@ function selectAlgorithm(algorithm) {
   updateAboutCard(algorithm);
 }
 
-pillsContainer.addEventListener("click", (e) => {
-  const btn = e.target.closest(".pill");
-  if (!btn) return;
-  selectAlgorithm(btn.dataset.algorithm);
-});
+algoSelect.addEventListener("change", () => selectAlgorithm(algoSelect.value));
 
 quickAlgoGrid.addEventListener("click", (e) => {
   const btn = e.target.closest(".quick-btn");
@@ -281,25 +330,22 @@ quickAlgoGrid.addEventListener("click", (e) => {
   selectAlgorithm(btn.dataset.algorithm);
 });
 
-// --- Sliders ---
-sizeSlider.addEventListener("input", () => {
-  sizeValueLabel.textContent = sizeSlider.value;
-});
-sizeSlider.addEventListener("change", () => {
+// --- Grid size / speed controls ---
+sizeSelect.addEventListener("change", () => {
   if (isPlaying()) stopPlaying();
-  initGridState(parseInt(sizeSlider.value, 10));
+  initGridState(parseInt(sizeSelect.value, 10));
   buildGrid();
   needsRefetch = true;
   stepCountEl.textContent = "Step 0 / 0";
-  stepDescEl.textContent = "Draw some walls (optional) and hit Go to begin.";
+  stepDescEl.textContent = "Draw some walls (optional) and hit Start to begin.";
+  statSteps.textContent = "-";
   statVisited.textContent = "-";
   statPathlen.textContent = "-";
   statTime.textContent = "-";
-  statFound.textContent = "-";
 });
 
 speedSlider.addEventListener("input", () => {
-  speedValueLabel.textContent = `${speedSlider.value}x`;
+  speedValueLabel.textContent = SPEED_LABELS[speedSlider.value] || "Medium";
 });
 
 // --- Maze / clear / reset ---
@@ -352,23 +398,32 @@ function startPlaying() {
     applyStep(step);
     stepCountEl.textContent = `Step ${currentStepIndex + 1} / ${currentSteps.length}`;
     stepDescEl.textContent = describeStep(step);
+    statSteps.textContent = `${currentStepIndex + 1} / ${currentSteps.length}`;
+    if (step.type === "visit") {
+      statVisited.textContent = (parseInt(statVisited.textContent, 10) || 0) + 1;
+    }
+    if (step.type === "path") {
+      statPathlen.textContent = step.path.length;
+    } else if (step.type === "not_found") {
+      statPathlen.textContent = "No path";
+    }
   }, SPEED_INTERVALS[speedSlider.value] || 30);
 
   setRunButtonIcon(PAUSE_ICON, "Pause");
   mazeBtn.disabled = true;
   clearWallsBtn.disabled = true;
-  sizeSlider.disabled = true;
-  pillsContainer.querySelectorAll(".pill").forEach((p) => p.disabled = true);
+  sizeSelect.disabled = true;
+  algoSelect.disabled = true;
 }
 
 function stopPlaying() {
   clearInterval(playTimer);
   playTimer = null;
-  setRunButtonIcon(PLAY_ICON, "Go");
+  setRunButtonIcon(PLAY_ICON, "Start");
   mazeBtn.disabled = false;
   clearWallsBtn.disabled = false;
-  sizeSlider.disabled = false;
-  pillsContainer.querySelectorAll(".pill").forEach((p) => p.disabled = false);
+  sizeSelect.disabled = false;
+  algoSelect.disabled = false;
 }
 
 runBtn.addEventListener("click", async () => {
@@ -380,8 +435,10 @@ runBtn.addEventListener("click", async () => {
   if (currentSteps.length > 0 && !needsRefetch) {
     if (currentStepIndex >= currentSteps.length - 1) {
       stepClasses = Array.from({ length: rows }, () => Array(cols).fill(""));
+      removePathOverlay();
       refreshAllCellClasses();
       currentStepIndex = -1;
+      statVisited.textContent = "0";
     }
     startPlaying();
     return;
@@ -397,13 +454,9 @@ runBtn.addEventListener("click", async () => {
     needsRefetch = false;
 
     stepClasses = Array.from({ length: rows }, () => Array(cols).fill(""));
+    removePathOverlay();
     refreshAllCellClasses();
-
-    statVisited.textContent = result.visited_count;
-    statPathlen.textContent = result.path_found ? result.path_length : "-";
-    statTime.textContent = `${result.execution_time_ms} ms`;
-    statFound.textContent = result.path_found ? "Yes" : "No";
-    statFound.className = result.path_found ? "ok-text" : "warn-text";
+    statVisited.textContent = "0";
 
     runBtn.disabled = false;
     startPlaying();
@@ -411,7 +464,7 @@ runBtn.addEventListener("click", async () => {
     alert(`Error running algorithm: ${err.message}`);
     console.error(err);
     runBtn.disabled = false;
-    setRunButtonIcon(PLAY_ICON, "Go");
+    setRunButtonIcon(PLAY_ICON, "Start");
   }
 });
 
@@ -419,3 +472,4 @@ runBtn.addEventListener("click", async () => {
 initGridState(cols);
 buildGrid();
 updateAboutCard(currentAlgorithm);
+speedValueLabel.textContent = SPEED_LABELS[speedSlider.value];

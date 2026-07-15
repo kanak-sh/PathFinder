@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PathFinder — Algorithm Visualizer</title>
+  <script>
+    (function () {
+      var t = localStorage.getItem("pf-theme");
+      if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
+      else if (window.matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.setAttribute("data-theme", "dark");
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="nav-backdrop" data-nav-backdrop></div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a href="home.html" class="brand">
+        <span class="brand-icon">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h6a4 4 0 0 1 4 4v2a4 4 0 0 1-4 4H8"/></svg>
+        </span>
+        <div>
+          <h1>PathFinder</h1>
+          <p class="tagline">Visualize. Explore.</p>
+        </div>
+      </a>
+
+      <nav class="nav-list">
+        <a href="home.html" class="nav-item active">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home
+        </a>
+        <a href="index.html" class="nav-item">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="10"/><line x1="10" y1="20" x2="10" y2="4"/><line x1="16" y1="20" x2="16" y2="14"/></svg>Sorting
+        </a>
+        <a href="pathfinding.html" class="nav-item">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/></svg>Pathfinding
+        </a>
+        <a href="compare.html" class="nav-item">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="16"/><rect x="14" y="4" width="7" height="16"/></svg>Compare
+        </a>
+        <a href="benchmarks.html" class="nav-item">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="14 6 21 6 21 13"/></svg>Benchmarks
+        </a>
+        <a href="history.html" class="nav-item">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>History
+        </a>
+      </nav>
+
+      <div class="sidebar-card">
+        <p class="sidebar-card-title">DSA made visual</p>
+        <p class="sidebar-card-body">Watch algorithms run step by step, race them head-to-head, and benchmark at scale.</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="top-bar">
+        <div class="top-bar-left">
+          <button class="nav-toggle" data-nav-toggle aria-label="Open menu">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div>
+            <h2>Welcome to <span class="accent">PathFinder</span></h2>
+            <p class="subtitle">A real-time visualizer for sorting and pathfinding algorithms, backed by Python and MySQL.</p>
+          </div>
+        </div>
+        <div class="top-bar-right">
+          <p id="status" class="pending">Checking connection...</p>
+          <button class="icon-toggle" data-theme-toggle aria-label="Toggle theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.9" y1="4.9" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.1" y2="19.1"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.9" y1="19.1" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.1" y2="4.9"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <section class="home-hero">
+        <span class="home-hero-badge">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Interactive DSA learning
+        </span>
+        <h2>See algorithms think, step by step.</h2>
+        <p class="subtitle">PathFinder runs the real algorithm on a Flask backend, records every step, and animates the result on the frontend. Pause, rewind, compare, and benchmark.</p>
+        <div class="home-cta-row">
+          <a href="index.html" class="home-cta-primary">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20"/></svg>
+            Start sorting
+          </a>
+          <a href="pathfinding.html" class="home-cta-secondary">
+            Explore pathfinding
+          </a>
+        </div>
+      </section>
+
+      <div class="home-stats-row" id="home-stats">
+        <div class="home-stat-pill"><strong id="stat-algos">11</strong><span>Algorithms</span></div>
+        <div class="home-stat-pill"><strong id="stat-runs">-</strong><span>Benchmark runs</span></div>
+        <div class="home-stat-pill"><strong id="stat-fastest">-</strong><span>Fastest run (ms)</span></div>
+        <div class="home-stat-pill"><strong>6</strong><span>Sorting algos</span></div>
+      </div>
+
+      <section class="feature-grid">
+        <a href="index.html" class="feature-card">
+          <span class="feature-icon sorting">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="20" x2="4" y2="10"/><line x1="10" y1="20" x2="10" y2="4"/><line x1="16" y1="20" x2="16" y2="14"/></svg>
+          </span>
+          <h3>Sorting Visualizer</h3>
+          <p>Bubble, Selection, Insertion, Merge, Quick, and Heap sort — with comparisons, swaps, pause/resume, and step controls.</p>
+          <span class="feature-link">Open visualizer &rarr;</span>
+        </a>
+
+        <a href="pathfinding.html" class="feature-card">
+          <span class="feature-icon pathfinding">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/></svg>
+          </span>
+          <h3>Pathfinding Visualizer</h3>
+          <p>Draw walls, move start/end nodes, generate mazes. Watch BFS, DFS, Dijkstra, A*, and Greedy explore the grid.</p>
+          <span class="feature-link">Open visualizer &rarr;</span>
+        </a>
+
+        <a href="compare.html" class="feature-card">
+          <span class="feature-icon compare">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="7" height="16"/><rect x="14" y="4" width="7" height="16"/></svg>
+          </span>
+          <h3>Side-by-Side Compare</h3>
+          <p>Run two algorithms on the same input simultaneously. See comparisons, swaps, and time diverge in real time.</p>
+          <span class="feature-link">Start a race &rarr;</span>
+        </a>
+
+        <a href="benchmarks.html" class="feature-card">
+          <span class="feature-icon benchmark">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 17 9 11 13 15 21 6"/></svg>
+          </span>
+          <h3>Benchmark Mode</h3>
+          <p>Run algorithms without animation at scale. Results stored in MySQL with execution time and memory usage.</p>
+          <span class="feature-link">Run benchmarks &rarr;</span>
+        </a>
+
+        <a href="history.html" class="feature-card">
+          <span class="feature-icon history">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>
+          </span>
+          <h3>History Dashboard</h3>
+          <p>View fastest and slowest runs, averages, favourite algorithm, and every past benchmark from the database.</p>
+          <span class="feature-link">View history &rarr;</span>
+        </a>
+      </section>
+
+      <section class="home-preview">
+        <div>
+          <div class="home-preview-bars" aria-hidden="true">
+            <div class="mini-bar" style="height:45%"></div>
+            <div class="mini-bar" style="height:72%"></div>
+            <div class="mini-bar" style="height:30%"></div>
+            <div class="mini-bar" style="height:88%"></div>
+            <div class="mini-bar" style="height:55%"></div>
+            <div class="mini-bar" style="height:40%"></div>
+            <div class="mini-bar" style="height:65%"></div>
+            <div class="mini-bar" style="height:95%"></div>
+            <div class="mini-bar" style="height:50%"></div>
+            <div class="mini-bar" style="height:78%"></div>
+          </div>
+          <div class="home-preview-grid" style="margin-top:12px;" aria-hidden="true">
+            <div class="pg-cell s"></div><div class="pg-cell v"></div><div class="pg-cell v"></div><div class="pg-cell w"></div><div class="pg-cell v"></div><div class="pg-cell p"></div><div class="pg-cell p"></div><div class="pg-cell e"></div>
+            <div class="pg-cell v"></div><div class="pg-cell v"></div><div class="pg-cell w"></div><div class="pg-cell w"></div><div class="pg-cell v"></div><div class="pg-cell p"></div><div class="pg-cell w"></div><div class="pg-cell"></div>
+            <div class="pg-cell v"></div><div class="pg-cell w"></div><div class="pg-cell v"></div><div class="pg-cell v"></div><div class="pg-cell p"></div><div class="pg-cell p"></div><div class="pg-cell v"></div><div class="pg-cell"></div>
+            <div class="pg-cell v"></div><div class="pg-cell v"></div><div class="pg-cell v"></div><div class="pg-cell p"></div><div class="pg-cell p"></div><div class="pg-cell v"></div><div class="pg-cell v"></div><div class="pg-cell"></div>
+          </div>
+        </div>
+        <div class="home-preview-text">
+          <h3>Backend computes, frontend animates</h3>
+          <p>Your input goes to a Python Flask API. The algorithm runs for real, every step is captured as JSON, and the canvas animates it frame by frame. Benchmarks are persisted to MySQL so you can compare Bubble vs Merge, Quick vs Heap, or A* vs Dijkstra over time.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/theme.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/home.js"></script>
+</body>
+</html>
