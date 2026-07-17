@@ -17,6 +17,7 @@ const chartLegend = document.getElementById("chart-legend");
 const resultsCard = document.getElementById("results-table-card");
 const resultsThead = document.getElementById("results-thead");
 const resultsTbody = document.getElementById("results-tbody");
+const exportBtn = document.querySelector(".export-btn");
 
 const SORTING_NAMES = {
   bubble: "Bubble", selection: "Selection", insertion: "Insertion",
@@ -93,7 +94,11 @@ function buildLineChart(seriesByAlgo, metric) {
   const xFor = (size) => padL + (maxSize === minSize ? 0 : (size - minSize) / (maxSize - minSize)) * innerW;
   const yFor = (val) => padT + innerH - ((val ?? 0) / maxVal) * innerH;
 
-  let svg = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
+  let svg = `<svg 
+  width="${width}"
+  height="${height}"
+  viewBox="0 0 ${width} ${height}"
+  xmlns="http://www.w3.org/2000/svg">`;
 
   const gridCount = 5;
   for (let i = 0; i <= gridCount; i++) {
@@ -234,4 +239,51 @@ runBtn.addEventListener("click", async () => {
   resultsCard.style.display = "block";
   renderChart();
   renderTable();
+});
+
+exportBtn.addEventListener("click", () => {
+  let csv = "";
+    if (currentCategory === "sorting") {
+      csv += "Algorithm,Input Size,Array Type,Comparisons,Swaps,Execution Time (ms),Memory (KB)\n";
+      Object.entries(resultsByAlgorithm).forEach(([algo, points]) => {
+        points.forEach(p => {
+          csv += [
+            names()[algo],
+            p.size,
+            p.array_type,
+            p.comparisons,
+            p.swaps,
+            p.execution_time_ms,
+            p.memory_kb
+          ].join(",") + "\n";
+        });
+      });
+    } else {
+      csv += "Algorithm,Grid Size,Wall Density,Visited Nodes,Path Length,Path Found,Execution Time (ms),Memory (KB)\n";
+      Object.entries(resultsByAlgorithm).forEach(([algo, points]) => {
+        points.forEach(p => {
+          csv += [
+          names()[algo],
+          p.size + "x" + p.size,
+          p.array_type,
+          p.visited_count,
+          p.path_length,
+          p.path_found,
+          p.execution_time_ms,
+          p.memory_kb
+        ].join(",") + "\n";
+      });
+    });
+  }
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = `benchmark_${currentCategory}_${Date.now()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 });

@@ -64,8 +64,10 @@
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
           <div>
-            <h2>Side-by-Side <span class="accent">Comparison</span></h2>
-            <p class="subtitle">Same array, two algorithms, watch how differently they get there.</p>
+            <h2>Compare <span class="accent">Algorithms</span></h2>
+            <p class="subtitle">
+              Select two algorithms, run them on the same input, and compare their performance side by side.
+            </p>
           </div>
         </div>
         <div class="top-bar-right">
@@ -88,6 +90,10 @@
       </section>
 
       <section class="visualizer-panel" id="sorting-panel-controls">
+        <div class="compare-section-title">
+          <h3>Comparison Settings</h3>
+          <p>Choose the algorithms and configure the comparison.</p>
+        </div>
         <div class="panel-controls">
           <div class="slider-group">
             <label>
@@ -137,6 +143,10 @@
       </section>
 
       <section class="visualizer-panel" id="pathfinding-panel-controls" style="display:none;">
+        <div class="compare-section-title">
+          <h3>Comparison Settings</h3>
+          <p>Select two pathfinding algorithms and compare them on the same maze.</p>
+        </div>
         <div class="panel-controls">
           <div class="slider-group">
             <label>
@@ -187,10 +197,15 @@
       <div class="bench-row-2" style="margin-bottom:1rem;">
         <button id="run-btn" class="btn-solid">
           <svg id="run-btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20"/></svg>
-          <span id="run-btn-label">Race</span>
+          <span id="run-btn-label">Compare</span>
         </button>
       </div>
 
+      <div class="compare-section-title">
+        <h3>Live Visualization</h3>
+        <p>Watch both algorithms process the same input in real time.</p>
+      </div>
+      
       <div class="compare-grid">
         <div class="compare-panel">
           <div class="compare-panel-header compare-a">
@@ -226,7 +241,7 @@
       </div>
 
       <section class="winner-card" id="winner-card" style="display:none;">
-        <p class="winner-title"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#EF9F27" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>Results</p>
+        <p class="winner-title"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#EF9F27" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>Comparison Summary</p>
         <div class="winner-grid" id="winner-grid"></div>
       </section>
     </main>
