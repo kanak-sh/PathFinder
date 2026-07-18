@@ -75,14 +75,21 @@ body{
 .logo{
     display:flex;
     align-items:center;
-    gap:12px;
-    font-size:24px;
-    font-weight:700;
-    color:var(--primary);
+    gap:14px;
 }
 
 .logo-icon{
-    font-size:28px;
+    width:42px;
+    height:42px;
+    display:block;
+    flex-shrink:0;
+}
+
+.logo-text{
+    font-size:2rem;
+    font-weight:700;
+    color:#6C63FF;
+    letter-spacing:-0.5px;
 }
 
 .nav-links{
